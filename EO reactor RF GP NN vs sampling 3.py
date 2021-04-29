@@ -1,9 +1,3 @@
-'''
-https://reader.elsevier.com/reader/sd/pii/S1385894712009205?token=E0238D3455B6F138F4DBFFC338E34550F10778CC924DF9611E655C171EE7C781F2848ABC5CCF3A081EDFD418D3737BF3EO
-'''
-import warnings
-# warnings.simplefilter(action='ignore', category=FutureWarning)
-# warnings.simplefilter(action='ignore', category=RuntimeWarning)
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -15,8 +9,6 @@ from itertools import product
 from pyDOE import lhs
 from skopt.space import Space
 from skopt.sampler import Lhs
-# from skopt.sampler import Lhs
-# from skopt.space import Space
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C,WhiteKernel
 import tensorflow as tf
@@ -326,107 +318,3 @@ def plot(pts_set):
 # gen_inlets(pts_set)
 # train_algs(pts_set)
 # plot(pts_set)
-#font+fontsize
-#sig figs on axes maybe
-
-
-# def plot():
-#     plt.figure()
-#     plt.plot(no_samples_set, avg_scores)
-#     plt.xlabel('Number of training points')
-#     plt.ylabel('Average test score over {} runs'.format(no_runs))
-#     plt.plot([], [], ' ', label='LHS RF')
-#     plt.legend()
-#     plt.savefig('LHS RF, accuracy vs samples.png', bbox_inches='tight')
-    
-#     plt.figure()
-#     plt.scatter(no_samples_set, avg_times_per_100samples)
-#     plt.xlabel('Number of training points')
-#     plt.ylabel('Average time per 100 samples over {} runs'.format(no_runs))
-#     plt.plot([], [], ' ', label='LHS RF')
-#     plt.legend()
-#     plt.savefig('LHS RF, speed vs samples.png', bbox_inches='tight')
-
-
-# C2H4_cost=1*Mr[0]/1000 # £1/kg * kg/kmol / 1000 mol/kmol
-# O2_cost=2.3*Mr[1]/1000 # £2.3/kg * kg/kmol / 1000 mol/kmol
-# Q_cost=0.2/3.6 # £0.2/kWh / 3.6 MJ/kWh = £/MJ
-# T in K, component flows in mol/s, Q in MJ, cat in kg
-# 405-530 K
-# 10-22 bar
-# yLowerCO2 >= 0.05
-
-# inlet = Stream(0.5,0.5,0.5,0.5,0,0,0)
-# result = UnitOp(inlet,[0.5,0.5]).results()
-# print(result)
-
-# def run_code():
-#     for ML_model in ['RF','GP','NN']:
-#         for sampling_technique in ['random','strat','lhs']:
-#             ln=compile("{}_{}_scores,{}_{}_times=[],[]".format(ML_model,sampling_technique,ML_model,sampling_technique),'<string>','exec');exec(ln)
-#             for pts in pts_set:
-#                 ln=compile("{}_{}_score,{}_{}_time=train_test_{}({},pts)".format(ML_model,sampling_technique,ML_model,sampling_technique,ML_model,'sampling_technique'),'<string>','exec');exec(ln)
-#                 ln=compile("{}_{}_scores.append({}_{}_score)".format(ML_model,sampling_technique,ML_model,sampling_technique),'<string>','exec');exec(ln)
-#                 ln=compile("{}_{}_times.append({}_{}_time)".format(ML_model,sampling_technique,ML_model,sampling_technique),'<string>','exec');exec(ln)
-#             ln=compile("plt.plot(pts_set,{}_{}_scores)";exec(ln)
-#             ln=compile("plt.plot(pts_set,{}_{}_times)";exec(ln)
-                     
-# def run_code():
-#     scores=[]
-#     for pts in pts_set:
-#         RFrandomscore,RFrandomtime=train_test_RF('random',pts)
-#         RFstratscore,RFstrattime=train_test_RF('strat',pts)
-#         RFlhsscore,RFlhstime=train_test_RF('lhs',pts)
-#         GPrandomscore,GPrandomtime=train_test_GP('random',pts)
-#         GPstratscore,GPstrattime=train_test_GP('strat',pts)
-#         GPlhsscore,GPlhstime=train_test_GP('lhs',pts)
-#         NNrandomscore,NNrandomtime=train_test_NN('random',pts)
-#         NNstratscore,NNstrattime=train_test_NN('strat',pts)
-#         NNlhsscore,NNlhstime=train_test_NN('lhs',pts)
-#         scores.append([[RFrandomscore,RFstratscore,RFlhsscore],[GPrandomscore,GPstratscore,GPlhsscore],[NNrandomscore,NNstratscore,NNlhsscore]])
-#     plt.plot(pts_set, [scores[0][0][0],scores[1][0][0]])#,scores[2][0][0],scores[3][0][0]]
-# pts_set=[10,20]
-# gen_inlets()
-# run_code()
-
-# def run_code2():
-#     scores=np.empty([3,3,2])
-#     times=np.empty([3,3,2])
-#     pts_set=[10,20]
-#     for i, method in enumerate(['random', 'strat', 'lhs']):
-#         for k,pts in enumerate(pts_set):
-#             RFscores, RFtimes=train_test_RF(method,pts)
-#             GPscores, GPtimes=train_test_GP(method,pts)
-#             NNscores, NNtimes=train_test_NN(method, pts)
-#             scores[0][i][k], scores[1][i][k], scores[2][i][k] = RFscores, GPscores, NNscores
-#             times[0][i][k], times[1][i][k], times[2][i][k] = RFtimes, GPtimes, NNtimes
-#         for j, ML_model in enumerate(['RF', 'GP', 'NN']):
-#             plt.figure(0)
-#             plt.plot(pts_set, scores[i][j], label=(ML_model, method))
-#             plt.figure(1)
-#             plt.plot(pts_set, times[i][j], label=(ML_model, method))
-#     plt.legend()
-#     plt.figure(1)
-#     plt.legend()
-
-# pts=500
-# # gen_test_data(pts)
-# sampling_technique='random'
-# # gen_random_data(pts)
-# print(train_test_NN(sampling_technique,pts))
-    
-# def gen_inlets():
-#     for sampling_technique in ['random','strat','lhs']:
-#         for pts in pts_set:
-#             ln=compile("gen_{}_data({})".format(sampling_technique,pts),'<string>','exec');exec(ln)
-
-# def gen_timesTEMP():
-#     with open('gen_times_{}.pkl'.format(10000),'rb') as f:
-#         times = pickle.load(f)
-#     times3000 = times[0:4]
-#     with open('gen_times_{}.pkl'.format(3000),'wb') as f:
-#         pickle.dump(times3000,f)
-
-# gen_timesTEMP()
-
-# print(gen_lhs_data(1069))
