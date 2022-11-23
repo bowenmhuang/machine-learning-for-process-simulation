@@ -11,6 +11,7 @@ Accuracy and speed of surrogate modelling for three different ML algorithms (ran
 In this part, the physical system being surrogate modelled was an ethylene oxide plug flow reactor.
 
 ![Surrogate modelling accuracy](images/part1_scores.png)
+<img src="images/part1_scores.png" alt="Surrogate modelling accuracy" width="50"/>
 
 ![Surrogate modelling speed](images/part1_times.png)
 
