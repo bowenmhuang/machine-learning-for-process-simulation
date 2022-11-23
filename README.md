@@ -20,3 +20,6 @@ In this part, the physical system being surrogate modelled was an ethylene oxide
 Use of random forest regression to surrogate model the objective function resulting from a non-linear optimization. Use of random forest classification to predict the convergence status of an optimization, thus saving time by avoiding infeasible initial conditions.
 
 In this part, the physical system being surrogate modelled was the purification section of an ethylene oxide process plant, consisting of a distillation column, absorption column, valve, heat exchanger and recycle stream.
+
+## Instructions to build and run:
+
