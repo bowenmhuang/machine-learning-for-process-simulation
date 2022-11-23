@@ -2,13 +2,6 @@
 
 This project was for my Master's thesis, which is here: https://drive.google.com/file/d/13_XyWe7enZe6xv0YRAvlKbVM2hDsGTNA/view?usp=share_link
 
-
-**Tech used:** Python, pandas, scikit-learn, Keras, NumPy, SciPy, Pyomo, IPOPT, matplotlib, seaborn
-
-Here's where you can go to town on how you actually built this thing. Write as much as you can here, it's totally fine if it's not too much just make sure you write *something*. If you don't have too much experience on your resume working on the front end that's totally fine. This is where you can really show off your passion and make up for that ten fold.
-
-
-
 This project was split into three parts of investigation. The results are as follows:
 
 ## Part 1: Surrogate modelling a chemical process using ML algorithms
@@ -37,4 +30,6 @@ In this part, the physical system being surrogate modelled was the purification 
 
 ![Optimization](images/part3.png)
 
-<!-- ## Instructions to build and run: -->
+## Instructions to build and run:
+
+The following packages are required: Python, pandas, scikit-learn, Keras, NumPy, SciPy, Pyomo, IPOPT, matplotlib, seaborn
