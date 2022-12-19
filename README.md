@@ -32,4 +32,4 @@ In this part, the physical system being surrogate modelled was the purification 
 
 ## Instructions to build and run:
 
-The following packages are required: Python, pandas, scikit-learn, Keras, NumPy, SciPy, Pyomo, IPOPT, matplotlib, seaborn
+The following packages should be installed: Python, pandas, scikit-learn, Keras, NumPy, SciPy, Pyomo, IPOPT, matplotlib, seaborn
