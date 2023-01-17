@@ -1,4 +1,4 @@
-# masters-research-project-machine-learning-for-process-simulation-and-optimization
+# machine-learning-for-process-simulation
 
 This project was for my Master's thesis, which is here: https://drive.google.com/file/d/13_XyWe7enZe6xv0YRAvlKbVM2hDsGTNA/view?usp=share_link
 
