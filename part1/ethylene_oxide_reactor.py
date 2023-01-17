@@ -1,14 +1,9 @@
 """
-This script contains the physical model of an ethylene oxide plug flow reactor
-
-inlet -> reactor model -> outlet
+Credit to my supervisor for the following physical model of an ethylene oxide plug flow reactor.
 
 The inlet stream is defined by temperature, pressure and molar flowrates
 The reactor model is defined by reaction kinetic equations, plus the amount of catalyst and heat added
 The outlet is solved for a given inlet by solving the model using solve_ivp numerical differential equation solver
-
-Note that the object-oriented programming of Stream and UnitOp was just for personal learning, not used extensively here.
-The benefit would be that it would be more intuitive and scalable for sequences of different unit operations in plant-wide models.
 """
 
 import numpy as np

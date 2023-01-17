@@ -1,5 +1,5 @@
 """
-this is where the code is executed.
+This is where the code is executed.
 
 Aim: to investigate the accuracy and speed of surrogate modelling an ethylene oxide reactor using different ML models and
 different sampling techniques to generate the training data.
@@ -13,7 +13,7 @@ Workflow:
 Output: Graphs showing the R^2 test scores and CPU times for different combinations of ML model / sampling technique / number of pts.
 """
 
-from gen_data import generate_test_data, generate_training_data
+from generate_data import generate_test_data, generate_training_data
 from train_ML_models import train_and_test_models
 from plot import plot_scores_times
 
@@ -23,7 +23,7 @@ def run_code():
     generate_test_data(test_pts)
 
     # generate training data. calculates inlet-outlet pairs using physical_model, for different inlet sampling techniques.
-    pts_set = [100, 300, 1000]
+    pts_set = [100, 300]
     generate_training_data(pts_set)
 
     # calculates test score and CPU times for different ML models and sampling techniques

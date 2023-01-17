@@ -1,5 +1,5 @@
 """
-this function plots the scores and times calculated from train_algs for different combinations of ML model/sampling technique/number of pts
+This function plots the scores and times calculated from train_algs for different combinations of ML model/sampling technique/number of pts
 """
 
 import pickle

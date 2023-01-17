@@ -1,8 +1,6 @@
 """
 These functions generate the training data of inlet-outlet pairs of the reactor,
 for different sampling techniques of the input space: random, stratified, latin hypercube.
-
-gen_training_data calls all 3 sampling techniques at once and pickles the data and the times to generate them.
 """
 
 import time
@@ -13,11 +11,11 @@ import numpy as np
 from skopt.space import Space
 from skopt.sampler import Lhs
 
-from physical_model import UnitOp, Stream
+from ethylene_oxide_reactor import UnitOp, Stream
 
 
 def generate_data_random_sampling(pts):
-    # random sampling
+    """random sampling"""
     t0 = time.process_time()
     inlets = []
     outlets = []
@@ -44,7 +42,7 @@ def generate_data_random_sampling(pts):
 
 
 def generate_data_stratified_sampling(pts):
-    # stratified sampling
+    """stratified sampling"""
     t0 = time.process_time()
     inlets = []
     outlets = []
@@ -78,14 +76,14 @@ def generate_data_stratified_sampling(pts):
 
 
 def generate_data_latin_hypercube_sampling(pts):
-    # latin hypercube sampling
+    """latin hypercube sampling"""
     t0 = time.process_time()
     inlets = []
     outlets = []
-    space = Space([(0.0, 1.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)])
-    lhss = Lhs(criterion="maximin", iterations=1000)
-    lhs_points = lhss.generate(space.dimensions, pts)
     # generate a latin hypercube sampled set of inlet streams within the 5 dimensional input space.
+    space = Space([(0.0, 1.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0), (0.0, 1.0)])
+    lhs = Lhs(criterion="maximin", iterations=1000)
+    lhs_points = lhs.generate(space.dimensions, pts)
     for i in range(pts):
         # generate inlet
         T, C2H4, O2, Q, cat = lhs_points[i]
@@ -102,17 +100,24 @@ def generate_data_latin_hypercube_sampling(pts):
     return (time.process_time() - t0) / pts * 100
 
 
-# generate the inlet-outlet training data pairs for different sampling techniques and different numbers of pts
 def generate_training_data(pts_set):
+    """generate the inlet-outlet training data pairs for different sampling techniques and different numbers of pts"""
     times = []
     for pts in pts_set:
-        times.append([generate_data_random_sampling(pts), generate_data_stratified_sampling(pts), generate_data_latin_hypercube_sampling(pts)])
+        times.append(
+            [
+                generate_data_random_sampling(pts),
+                generate_data_stratified_sampling(pts),
+                generate_data_latin_hypercube_sampling(pts),
+            ]
+        )
     with open("pickled_data/gen_times_{}.pkl".format(pts_set[-1]), "wb") as f:
         pickle.dump(times, f)
 
 
-# generate the inlet-outlet test data pairs for a given number of pts. the test data is randomly sampled and the same test data is used across all tests to make it fair.
 def generate_test_data(pts):
+    """generate the inlet-outlet test data pairs for a given number of pts.
+    the test data is randomly sampled and the same test data is used across all tests to make it fair."""
     inlets = []
     outlets = []
     for i in range(pts):

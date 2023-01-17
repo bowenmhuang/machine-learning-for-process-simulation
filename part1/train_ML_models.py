@@ -57,7 +57,9 @@ def train_and_test_gaussian_process_regressor(sampling_technique, pts):
     # define hyperparameters of ML model
     kernel = C(1e-5) * RBF() + RBF(0.1) + WhiteKernel()
     # train the ML model
-    gaussian_process_regressor = GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=3)
+    gaussian_process_regressor = GaussianProcessRegressor(
+        kernel=kernel, n_restarts_optimizer=3
+    )
     gaussian_process_regressor.fit(inlet_df, outlet_df)
     # calculate the test score and time taken
     score = gaussian_process_regressor.score(test_inlet_df, test_outlet_df)
@@ -100,9 +102,9 @@ def train_and_test_neural_network(sampling_technique, pts):
 
 
 def train_and_test_models(pts_set):
-    '''trains and tests the ML models (RF,GP,NN) for different sampling techniques (random,strat,lhs) and number of training pts
+    """trains and tests the ML models (RF,GP,NN) for different sampling techniques (random,strat,lhs) and number of training pts
     pickles the scores and times for each combination of model/sampling/no. of pts
-    '''
+    """
     scores = np.empty([3, 3, len(pts_set)])
     times = np.empty([3, 3, len(pts_set)])
     for i, method in enumerate(["random", "strat", "lhs"]):
