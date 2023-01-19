@@ -14,8 +14,8 @@ Output: Graphs showing the R^2 test scores and CPU times for different combinati
 """
 
 from generate_data import generate_test_data, generate_training_data
-from train_ML_models import train_and_test_models
-from plot import plot_scores_times
+from train_and_test_ML_models import train_and_test_models
+from plot import plot_scores_and_times
 
 def run_code():
     # generate test data. calculates inlet-outlet pairs using physical_model. test data is generated once, via random sampling, for all tests.
@@ -23,13 +23,13 @@ def run_code():
     generate_test_data(test_pts)
 
     # generate training data. calculates inlet-outlet pairs using physical_model, for different inlet sampling techniques.
-    pts_set = [100, 300]
+    pts_set = [100, 300, 1000, 3000, 10000]
     generate_training_data(pts_set)
 
     # calculates test score and CPU times for different ML models and sampling techniques
     train_and_test_models(pts_set)
 
-    # plots the results from train_algs
-    plot_scores_times(pts_set)
+    # plots the results from train_ML_models
+    plot_scores_and_times(pts_set)
 
 run_code()

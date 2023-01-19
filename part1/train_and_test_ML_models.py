@@ -118,24 +118,24 @@ def train_and_test_models(pts_set):
                 NNscores,
             )
             times[0][i][k], times[1][i][k], times[2][i][k] = RFtimes, GPtimes, NNtimes
-    with open("pickled_data/scores_{}.pkl".format(pts_set[-1]), "wb") as f:
+    with open("part1/pickled_data/scores_{}.pkl".format(pts_set[-1]), "wb") as f:
         pickle.dump(scores, f)
-    with open("pickled_data/times_{}.pkl".format(pts_set[-1]), "wb") as f:
+    with open("part1/pickled_data/times_{}.pkl".format(pts_set[-1]), "wb") as f:
         pickle.dump(times, f)
 
 
 def unpickle_data(sampling_technique, pts):
     # unpickles the training and test data for the ML training and testing functions
     with open(
-        "pickled_data/{}_inlets_{}.pkl".format(sampling_technique, pts), "rb"
+        "part1/pickled_data/{}_inlets_{}.pkl".format(sampling_technique, pts), "rb"
     ) as f:
         inlets = pickle.load(f)
     with open(
-        "pickled_data/{}_outlets_{}.pkl".format(sampling_technique, pts), "rb"
+        "part1/pickled_data/{}_outlets_{}.pkl".format(sampling_technique, pts), "rb"
     ) as f:
         outlets = pickle.load(f)
-    with open("pickled_data/test_inlets.pkl", "rb") as f:
+    with open("part1/pickled_data/test_inlets.pkl", "rb") as f:
         test_inlets = pickle.load(f)
-    with open("pickled_data/test_outlets.pkl", "rb") as f:
+    with open("part1/pickled_data/test_outlets.pkl", "rb") as f:
         test_outlets = pickle.load(f)
     return inlets, outlets, test_inlets, test_outlets

@@ -13,11 +13,11 @@ def plot_scores_and_times(pts_set):
     plt.rcParams.update(params)
 
     # get the data
-    with open("pickled_data/scores_{}.pkl".format(pts_set[-1]), "rb") as f:
+    with open("part1/pickled_data/scores_{}.pkl".format(pts_set[-1]), "rb") as f:
         scores = pickle.load(f)
-    with open("pickled_data/times_{}.pkl".format(pts_set[-1]), "rb") as f:
+    with open("part1/pickled_data/times_{}.pkl".format(pts_set[-1]), "rb") as f:
         times = pickle.load(f)
-    with open("pickled_data/gen_times_{}.pkl".format(pts_set[-1]), "rb") as f:
+    with open("part1/pickled_data/gen_times_{}.pkl".format(pts_set[-1]), "rb") as f:
         gen_times = pickle.load(f)
     gen_times = np.array(gen_times).T.tolist()
 
@@ -58,8 +58,8 @@ def plot_scores_and_times(pts_set):
     ax_.set_xticks([2, 2.5, 3, 3.5, 4])
     ax_2.set_xticks([2, 2.5, 3, 3.5, 4])
     fig_.savefig(
-        "results/scores_{}.png".format(pts_set[-1]), dpi=200, bbox_inches="tight"
+        "part1/plots/scores_{}.png".format(pts_set[-1]), dpi=200, bbox_inches="tight"
     )
     fig_2.savefig(
-        "results/times_{}.png".format(pts_set[-1]), dpi=200, bbox_inches="tight"
+        "part1/plots/times_{}.png".format(pts_set[-1]), dpi=200, bbox_inches="tight"
     )
