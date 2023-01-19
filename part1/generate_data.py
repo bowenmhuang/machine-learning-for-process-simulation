@@ -4,7 +4,7 @@ for different sampling techniques of the input space: random, stratified, latin 
 """
 
 import time
-import pickle
+import json
 from itertools import product
 
 import numpy as np
@@ -34,10 +34,10 @@ def generate_data_random_sampling(pts):
         # record the inlet and outlet
         inlets.append([T, C2H4, O2, Q, cat])
         outlets.append(result)
-    with open("pickled_data/random_inlets_{}.pkl".format(pts), "wb") as f:
-        pickle.dump(inlets, f)
-    with open("pickled_data/random_outlets_{}.pkl".format(pts), "wb") as f:
-        pickle.dump(outlets, f)
+    with open("json_data/random_inlets_{}.json".format(pts), "w") as f:
+        json.dump(inlets, f)
+    with open("json_data/random_outlets_{}.json".format(pts), "w") as f:
+        json.dump(outlets, f)
     return (time.process_time() - t0) / pts * 100
 
 
@@ -68,10 +68,10 @@ def generate_data_stratified_sampling(pts):
         result = UnitOp(Stream(*s), [Q, cat]).results()
         inlets.append([T, C2H4, O2, Q, cat])
         outlets.append(result)
-    with open("pickled_data/strat_inlets_{}.pkl".format(pts), "wb") as f:
-        pickle.dump(inlets, f)
-    with open("pickled_data/strat_outlets_{}.pkl".format(pts), "wb") as f:
-        pickle.dump(outlets, f)
+    with open("json_data/strat_inlets_{}.json".format(pts), "w") as f:
+        json.dump(inlets, f)
+    with open("json_data/strat_outlets_{}.json".format(pts), "w") as f:
+        json.dump(outlets, f)
     return (time.process_time() - t0) / pts * 100
 
 
@@ -93,10 +93,10 @@ def generate_data_latin_hypercube_sampling(pts):
         result = UnitOp(Stream(*s), [Q, cat]).results()
         inlets.append([T, C2H4, O2, Q, cat])
         outlets.append(result)
-    with open("pickled_data/lhs_inlets_{}.pkl".format(pts), "wb") as f:
-        pickle.dump(inlets, f)
-    with open("pickled_data/lhs_outlets_{}.pkl".format(pts), "wb") as f:
-        pickle.dump(outlets, f)
+    with open("json_data/lhs_inlets_{}.json".format(pts), "w") as f:
+        json.dump(inlets, f)
+    with open("json_data/lhs_outlets_{}.json".format(pts), "w") as f:
+        json.dump(outlets, f)
     return (time.process_time() - t0) / pts * 100
 
 
@@ -111,8 +111,8 @@ def generate_training_data(pts_set):
                 generate_data_latin_hypercube_sampling(pts),
             ]
         )
-    with open("pickled_data/gen_times_{}.pkl".format(pts_set[-1]), "wb") as f:
-        pickle.dump(times, f)
+    with open("json_data/gen_times_{}.json".format(pts_set[-1]), "w") as f:
+        json.dump(times, f)
 
 
 def generate_test_data(pts):
@@ -133,7 +133,7 @@ def generate_test_data(pts):
         result = UnitOp(Stream(*s), [Q, cat]).results()
         inlets.append([T, C2H4, O2, Q, cat])
         outlets.append(result)
-    with open("pickled_data/test_inlets.pkl", "wb") as f:
-        pickle.dump(inlets, f)
-    with open("pickled_data/test_outlets.pkl", "wb") as f:
-        pickle.dump(outlets, f)
+    with open("json_data/test_inlets.json", "w") as f:
+        json.dump(inlets, f)
+    with open("json_data/test_outlets.json", "w") as f:
+        json.dump(outlets, f)

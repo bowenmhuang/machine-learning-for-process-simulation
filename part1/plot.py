@@ -2,7 +2,7 @@
 This function plots the scores and times calculated from train_algs for different combinations of ML model/sampling technique/number of pts
 """
 
-import pickle
+import json
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,12 +13,12 @@ def plot_scores_and_times(pts_set):
     plt.rcParams.update(params)
 
     # get the data
-    with open("pickled_data/scores_{}.pkl".format(pts_set[-1]), "rb") as f:
-        scores = pickle.load(f)
-    with open("pickled_data/times_{}.pkl".format(pts_set[-1]), "rb") as f:
-        times = pickle.load(f)
-    with open("pickled_data/gen_times_{}.pkl".format(pts_set[-1]), "rb") as f:
-        gen_times = pickle.load(f)
+    with open("json_data/scores_{}.json".format(pts_set[-1]), "r") as f:
+        scores = json.load(f)
+    with open("json_data/times_{}.json".format(pts_set[-1]), "r") as f:
+        times = json.load(f)
+    with open("json_data/gen_times_{}.json".format(pts_set[-1]), "r") as f:
+        gen_times = json.load(f)
     gen_times = np.array(gen_times).T.tolist()
 
     # make the plots

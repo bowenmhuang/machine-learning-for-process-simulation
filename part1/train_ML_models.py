@@ -6,7 +6,7 @@ train_algs calculates the scores and times for each ML model / sampling techniqu
 """
 
 import time
-import pickle
+import json
 
 import numpy as np
 import pandas as pd
@@ -118,24 +118,24 @@ def train_and_test_models(pts_set):
                 NNscores,
             )
             times[0][i][k], times[1][i][k], times[2][i][k] = RFtimes, GPtimes, NNtimes
-    with open("pickled_data/scores_{}.pkl".format(pts_set[-1]), "wb") as f:
-        pickle.dump(scores, f)
-    with open("pickled_data/times_{}.pkl".format(pts_set[-1]), "wb") as f:
-        pickle.dump(times, f)
+    with open("json_data/scores_{}.json".format(pts_set[-1]), "w") as f:
+        json.dump(scores, f)
+    with open("json_data/times_{}.json".format(pts_set[-1]), "w") as f:
+        json.dump(times, f)
 
 
 def unpickle_data(sampling_technique, pts):
     # unpickles the training and test data for the ML training and testing functions
     with open(
-        "pickled_data/{}_inlets_{}.pkl".format(sampling_technique, pts), "rb"
+        "json_data/{}_inlets_{}.json".format(sampling_technique, pts), "r"
     ) as f:
-        inlets = pickle.load(f)
+        inlets = json.load(f)
     with open(
-        "pickled_data/{}_outlets_{}.pkl".format(sampling_technique, pts), "rb"
+        "json_data/{}_outlets_{}.json".format(sampling_technique, pts), "r"
     ) as f:
-        outlets = pickle.load(f)
-    with open("pickled_data/test_inlets.pkl", "rb") as f:
-        test_inlets = pickle.load(f)
-    with open("pickled_data/test_outlets.pkl", "rb") as f:
-        test_outlets = pickle.load(f)
+        outlets = json.load(f)
+    with open("json_data/test_inlets.json", "r") as f:
+        test_inlets = json.load(f)
+    with open("json_data/test_outlets.json", "r") as f:
+        test_outlets = json.load(f)
     return inlets, outlets, test_inlets, test_outlets
