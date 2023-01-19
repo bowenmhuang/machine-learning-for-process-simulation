@@ -10,7 +10,7 @@ def run_code():
 
     pts_set = [10, 30, 100, 300, 1000]
     run_model_before_and_after_ML_prediction(pts_set)
-    plot(pts_set)
+    plot_success_rates(pts_set)
     plot_scores(pts_set)
 
 run_code()
