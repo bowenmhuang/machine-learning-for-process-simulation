@@ -7,9 +7,9 @@ from sklearn.ensemble import RandomForestRegressor
 
 def train_random_forest(pts):
     t0 = time.process_time()
-    with open("random_inlets_{}.pkl".format(pts), "rb") as f:
+    with open("part2/pickled_data/random_inlets_{}.pkl".format(pts), "rb") as f:
         data = pickle.load(f)
-    with open("results_{}.pkl".format(pts), "rb") as f:
+    with open("part2/pickled_data/results_{}.pkl".format(pts), "rb") as f:
         results = pickle.load(f)
     initial_data = []
     initial_results = []
@@ -24,6 +24,6 @@ def train_random_forest(pts):
     outlet_df = pd.DataFrame(initial_results)
     RF = RandomForestRegressor(n_estimators=50)  # n_estimators=50
     RF.fit(inlet_df, outlet_df)
-    with open("EO_RF_{}.pkl".format(pts), "wb") as f:
+    with open("part2/pickled_data/EO_RF_{}.pkl".format(pts), "wb") as f:
         pickle.dump(RF, f)
     return (time.process_time() - t0) / pts * 100

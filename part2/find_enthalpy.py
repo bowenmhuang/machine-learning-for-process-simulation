@@ -1,7 +1,7 @@
 """
 Credit to my supervisor for the following physical models of an ethylene oxide flash drum.
 
-Physical model for finding the enthalpy of a stream.
+Physical model for finding the enthalpy of a multi-component stream.
 """
 
 import numpy as np
