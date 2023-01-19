@@ -101,7 +101,7 @@ def train_and_test_neural_network(sampling_technique, pts):
     return [score, time_taken]
 
 
-def train_and_test_models(pts_set):
+def train_and_test_ML_models(pts_set):
     """trains and tests the ML models (RF,GP,NN) for different sampling techniques (random,strat,lhs) and number of training pts
     pickles the scores and times for each combination of model/sampling/no. of pts
     """
