@@ -1,10 +1,15 @@
+'''
+Generate training data for ML model.
+'''
+
+
 import pickle
 
 import numpy as np
 import pandas as pd
 import seaborn as sns
 
-import solve_section
+from solve_section import solve_section
 
 
 def generate_inlet():
@@ -17,36 +22,7 @@ def generate_inlet():
     return [HX, GLE, dP, VLE1, VLE2]
 
 
-def generate_data(pts, ops):
-    data = []
-    objs = []
-    is_successes = []
-    successes = 0
-    for i in range(pts):
-        inlet = generate_inlet()
-        data.append([float(i) for i in inlet])
-        obj, is_success = solve_section(inlet, ops)
-        objs.append(obj)
-        is_successes.append(is_success)
-        if is_success == 1:
-            successes += 1
-    if ops == 1:
-        data_df = pd.DataFrame(data, columns=["HX", "GLE"])
-    else:
-        data_df = pd.DataFrame(data, columns=["HX", "GLE", "dP", "VLE1", "VLE2"])
-    data_df["accuracy"] = is_successes
-    sns.pairplot(data_df, kind="scatter", hue="accuracy")
-    with open("training_inlets_{}_{}.pkl".format(pts, ops), "wb") as f:
-        pickle.dump(data, f)
-    with open("training_outlets_{}_{}.pkl".format(pts, ops), "wb") as f:
-        pickle.dump(objs, f)
-    with open("training_successes_{}_{}.pkl".format(pts, ops), "wb") as f:
-        pickle.dump(is_successes, f)
-    print(successes / pts)
-    return data, objs, is_successes
-
-
-def generate_test_data(pts, ops):
+def generate_data(pts):
     data = []
     objs = []
     is_successes = []
@@ -59,11 +35,37 @@ def generate_test_data(pts, ops):
         is_successes.append(is_success)
         if is_success == 1:
             successes += 1
-    with open("test_inlets_{}_{}.pkl".format(pts, ops), "wb") as f:
+    data_df = pd.DataFrame(data, columns=["HX", "GLE", "dP", "VLE1", "VLE2"])
+    data_df["accuracy"] = is_successes
+    sns.pairplot(data_df, kind="scatter", hue="accuracy")
+    with open("training_inlets_{}.pkl".format(pts), "wb") as f:
         pickle.dump(data, f)
-    with open("test_outlets_{}_{}.pkl".format(pts, ops), "wb") as f:
+    with open("training_outlets_{}.pkl".format(pts), "wb") as f:
         pickle.dump(objs, f)
-    with open("test_successes_{}_{}.pkl".format(pts, ops), "wb") as f:
+    with open("training_successes_{}.pkl".format(pts), "wb") as f:
+        pickle.dump(is_successes, f)
+    print(successes / pts)
+    return data, objs, is_successes
+
+
+def generate_test_data(pts):
+    data = []
+    objs = []
+    is_successes = []
+    successes = 0
+    for i in range(pts):
+        inlet = generate_inlet()
+        data.append([float(i) for i in inlet])
+        obj, is_success = solve_section(inlet)
+        objs.append(obj)
+        is_successes.append(is_success)
+        if is_success == 1:
+            successes += 1
+    with open("test_inlets_{}.pkl".format(pts), "wb") as f:
+        pickle.dump(data, f)
+    with open("test_outlets_{}.pkl".format(pts), "wb") as f:
+        pickle.dump(objs, f)
+    with open("test_successes_{}.pkl".format(pts), "wb") as f:
         pickle.dump(is_successes, f)
     print(successes / pts)
     return data, objs, is_successes

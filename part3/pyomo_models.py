@@ -1,26 +1,35 @@
 """
 Credit to my supervisor for the following physical models of various chemical processes.
 
-pyomo models for the unit blocks including: HX, mix, rxn, LLE, flash, dP, recycle
-Here, we build a 'lego' approach to unit (contraint) de/activation
+Here, we build a 'lego' approach to unit (contraint) de/activation.
+Pyomo models for the unit blocks including:
+heat exchanger (HX), mixing (mixer), reaction (rxn), liquid liquid extraction (LLE),
+flash drum (flash), valve (dP), and recycle
 """
 
+import time
+import logging
+
 import numpy as np
-import time
 import pandas as pd
-import random
-import time
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
-import pyomo as pyoo
-
 from pyomo.dae import *
-import logging
+
 
 logging.getLogger("pyomo.core").setLevel(logging.CRITICAL)
 
 
 s = [0, 1, 0.025, 0.94996, 1e-5, 1e-5, 0.05, 1e-5, 1e-5]
+slope = np.array([232, 1.9e6, 200, 1, 1, 1, 1, 1, 1, 1.01e7])
+intcp = np.array([298, 1e5, 0, 0, 0, 0, 0, 0, 0, -1e5])
+# feed =[298,1e6,5,0.9995,1e-5,1e-5,1e-5,1e-5,1e-5,-43.094768]
+empty = [298, 1e6, 0, 0.16, 0.16, 0.16, 0.16, 0.16, 0.17, 0]
+# fdval={}
+emptval = {}
+for i in range(len(empty)):
+    # fdval[i+1]= feed[i]
+    emptval[i + 1] = empty[i]
 
 
 def strm_bnds(m, i):
@@ -45,19 +54,6 @@ def hpfr_bnds(m, i, t):  ## compnent enthalpy bounds
     lb = {1: -2e5, 2: -2e5, 3: -2e5, 4: -2e5, 5: -2e5, 6: -2e5}
     ub = {1: 2e5, 2: 2e5, 3: 2e5, 4: 2e5, 5: 2e5, 6: 2e5}
     return (lb[i], ub[i])
-
-
-slope = np.array([232, 1.9e6, 200, 1, 1, 1, 1, 1, 1, 1.01e7])
-intcp = np.array([298, 1e5, 0, 0, 0, 0, 0, 0, 0, -1e5])
-
-
-# feed =[298,1e6,5,0.9995,1e-5,1e-5,1e-5,1e-5,1e-5,-43.094768]
-empty = [298, 1e6, 0, 0.16, 0.16, 0.16, 0.16, 0.16, 0.17, 0]
-# fdval={}
-emptval = {}
-for i in range(len(empty)):
-    # fdval[i+1]= feed[i]
-    emptval[i + 1] = empty[i]
 
 
 def start_episode():
@@ -346,8 +342,6 @@ def PFR(m, inlet, outlet, res_time):
             )
             m.heat_constr_cnt.value += 1
         m.constr_cnt.value += 1
-    # discretizer = TransformationFactory('dae.finite_difference')
-    # discretizer.apply_to(m,nfe =5 , wrt=m.t , scheme='BACKWARD')#,scheme='LAGRANGE-RADAU', nfe=2, ncp=3)
     discretizer = TransformationFactory("dae.collocation")
     discretizer.apply_to(m, scheme="LAGRANGE-RADAU", nfe=3, ncp=5)
     for i in m.T:
@@ -369,8 +363,6 @@ def PFR(m, inlet, outlet, res_time):
                 - m.cp_coef[j, 5] / (m.T[i].value / 1000)
                 + m.cp_coef[j, 6]
             )
-    # print('PFR m.n[EO]:',[m.n[3,i].value for i in m.t])
-    # print('PFR out EO:', outlet[6].value)
     control_lst = [*[str(m.q[i]) for i in m.t], *[str(m.jE[i]) for i in m.t]]
     for contr in control_lst:
         contrdict = compile(
@@ -380,7 +372,6 @@ def PFR(m, inlet, outlet, res_time):
         )
         exec(contrdict)
         m.control_cnt.value += 1
-    # cost_lst=[[m.q_cost,m.integ_q],[m.Et_cost,m.integ_j]]
     m.cost_dict[value(m.cost_cnt)] = 0.5 * (
         ((2 * m.q_cost.value * value(m.integ_q)) ** 2 + 0.01**2) ** 0.5
     )
@@ -392,14 +383,6 @@ def PFR(m, inlet, outlet, res_time):
 
     m.c_cost1 = Constraint(expr=cost1)
     m.cost_cnt.value += 1
-    # m.cost_dict[value(m.cost_cnt)] = m.Et_cost.value*(value(m.integ_j))
-    # def cost2(m): return m.cost_dict[value(m.cost_cnt)] == m.Et_cost*(m.integ_j)
-    # m.c_cost2=Constraint(expr=cost2)
-    # m.cost_cnt.value+=1
-    # cost_lst=[[m.q_cost,m.integ_q],[m.Et_cost,m.integ_j]]
-    # for cost in cost_lst:
-    #     # costdict=compile('m.cost_dict[value(m.cost_cnt)]=str(m.{}*m.{})'.format(cost[0],cost[1]),'<string>','exec');exec(costdict)
-    #     m.cost_cnt.value+=1
     return m
 
 

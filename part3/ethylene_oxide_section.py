@@ -1,22 +1,20 @@
 """
 Credit to my supervisor for the following code to optimise an ethylene oxide process flowsheet.
-
-This is the env where LL makes decisions, it should keep adding units to the same m model, 
-this requires we tell it how to attached each unit's constraints to m
 """
 
-import gym
-import numpy as np
-import pandas as pd
-from gym import error, spaces, utils
-from gym.utils import seeding
 import time
 import random
+import logging
+
+import numpy as np
+import pandas as pd
+import gym
+from gym import spaces
+from gym.utils import seeding
 from pyomo.environ import *
 from pyomo.opt import SolverFactory
-
 from pyomo_models import *
-import logging
+
 
 logging.getLogger("pyomo.core").setLevel(logging.CRITICAL)
 np.warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
@@ -28,34 +26,24 @@ def strm_bnds(m, i):
     return (lb[i], ub[i])
 
 
-def h_bnds(m, i):  ## compnent enthalpy bounds
+def h_bnds(m, i):  ## component enthalpy bounds
     lb = {1: -100, 2: -100, 3: -100, 4: -100, 5: -100, 6: -100}
     ub = {1: 2e5, 2: 2e5, 3: 2e5, 4: 2e5, 5: 2e5, 6: 2e5}
     return (lb[i], ub[i])
 
 
-def hpfr_bnds(m, i, t):  ## compnent enthalpy bounds
+def hpfr_bnds(m, i, t):  ## component enthalpy bounds
     lb = {1: -100, 2: -100, 3: -100, 4: -100, 5: -100, 6: -100}
     ub = {1: 2e5, 2: 2e5, 3: 2e5, 4: 2e5, 5: 2e5, 6: 2e5}
     return (lb[i], ub[i])
 
 
 ## this slope and intercept are used to normalize stream,m properties.
-# obs_slope=np.array([232,1.9e6, 200,.99994,.99994,.99994,.99994,.99994,.99994,1.01e7])
-# obs_intcp=np.array([298,  1e5,   0,  1e-5,  1e-5,  1e-5,  1e-5,  1e-5,  1e-5,  -1e5])
 obs_slope = np.array([232, 1.9e6, 200, 1, 1, 1, 1, 1, 1, 1.01e7])
 obs_intcp = np.array([298, 1e5, 0, 0, 0, 0, 0, 0, 0, -1e5])
 
-# feed =[298,2e6,1,0.9995,1e-5,1e-5,1e-5,1e-5,1e-5,-43.094768]
-# empty=[298,1e6,0,  0.16,0.16,0.16,0.16,0.16,0.17, 0]
-# fdval={}
-# emptval={}
-# for i in range(len(feed)):
-#     fdval[i+1]= feed[i]
-#     emptval[i+1]= empty[i]
 
-
-class LLEOEnv(gym.Env):
+class EthyleneOxideEnv(gym.Env):
     metadata = {"render.modes": ["human"]}
 
     def __init__(self):
@@ -74,7 +62,6 @@ class LLEOEnv(gym.Env):
         self.max_actions = 10  # number of sections
         self.seed()
         self.feed_method = "set"
-        # self.sec_feed=self.get_feed(self.feed_method) ### we use this in HLenv to define the section feed
         self.feed = self.get_feed(self.feed_method)
         self.state = self.feed  # current state
         self.sg = random.choice([0])
@@ -94,7 +81,6 @@ class LLEOEnv(gym.Env):
         self.act_cnt = 0  # action counter per section
         self.action_cnt_checkpoint = 0  ##action count checkpoint to connect sections
         self.last_conc = 0
-        # self.HL=HighLevel(50)
         self.m = start_episode()
         self.m.s01 = Var(
             self.m.props,
@@ -155,15 +141,10 @@ class LLEOEnv(gym.Env):
                 "outprop",
             ),
         )
-        # print(self.HL.update_sgdict())
-        # a=self.HL.get_next_sg()
-        # print(a)
-        # self.revise_sg()
 
     def get_feed(self, method):
         if method == "set":
-            # return (np.array([298,2e6,2,0.99995,1e-5,1e-5,1e-5,1e-5,1e-5,-43.0948126793,0])-self.obs_intcp)/self.obs_slope
-            ### below is if we want 0.05 CO2 in feed cuz of PFR model
+            ### below is if we want 0.05 CO2 in feed because of PFR model
             return (
                 np.array(
                     [
@@ -182,8 +163,6 @@ class LLEOEnv(gym.Env):
                 )
                 - self.obs_intcp
             ) / self.obs_slope
-            # return np.array([1.   , 0.998 ,0.079 ,0.083, 0.148, 0.037, 0.017, 0.014, 0.702, 0.022, 0.   ])
-            # return np.array([0.99993, 0.99832, 0.07861, 0.08328, 0.14772, 0.03691, 0.01677, 0.01359, 0.70173, 0.02207, 1.     ])
 
     def stream_dict(self, stream):
         stmdct = {}
@@ -204,7 +183,6 @@ class LLEOEnv(gym.Env):
         return [seed]
 
     def reset(self):
-        # self.feed=self.get_feed(self.feed_method)#,self.rand_feed()
         self.state = self.sf  # current state sf
         self.stream_cnt = self.stream_cnt_checkpoint  # number of streams so far
         self.key_path = [self.sf_num]  # list of key_path streams
@@ -275,9 +253,6 @@ class LLEOEnv(gym.Env):
         # self.reset()
 
     def revise_sg(self):
-        # profit = solve_process() ## if all sgs have been solved, do we need to solve full process again? maybe just update TDG when finished.
-        ##reset HL.reset: should update HL.sf_num and HL.free_sf to feed only
-        # print('self.sf in revise_sg',self.sf[:-1], 'open streams', self.open_props)
         self.HL.update_TDG(
             self.sf_num,
             self.sf[:-1],
@@ -295,21 +270,9 @@ class LLEOEnv(gym.Env):
             print("empty sg_dict so reset process, ", self.HL.sg_dict.values())
             self.reset_process()  ##gotta make sure having the feed as s' of the last sf_num is not an issue. If it is then just use same stream as s', then reset process
             self.HL.update_sgdict()
-            # self.HL.get_next_sg()
 
-        # print('revise_sg, hl.sg_dict:',[item for sublist in self.HL.sg_dict.values() for item in sublist])
         self.sf_num, self.sg, info = self.HL.get_next_sg()
-        # if len(self.pdf.index)>0: ## if not new process
-        #     sf=self.sf*self.obs_slope[:-1]+self.obs_intcp[:-1]
-        #     for i in self.pdf.index: ##specify section feed number from prop
-        #         for j in range(len(self.pdf.loc[i,'outprop'])):
-        #             print('191:',sf, self.pdf.loc[i]['outprop'][j])
-        #             if all(sf == self.pdf.loc[i]['outprop'][j]): self.sf_num=self.pdf.loc[i]['outlets'][j]
-        #             else:
-        #                 print('issue w finding new sf location', sf)
-        #                 print([self.pdf[i]['outprop'][j]]); raise ValueError
         if len(self.pdf.index) > 0:  ## if not new process
-            # sf=self.sf*self.obs_slope[:-1]+self.obs_intcp[:-1]
             sf = [
                 self.pdf.iloc[i]["outprop"][j]
                 for i in self.pdf.index
@@ -318,9 +281,6 @@ class LLEOEnv(gym.Env):
             ][0]
             print("revisesg sf:", sf)
             self.sf = (sf - self.obs_intcp[:-1]) / self.obs_slope[:-1]
-            # self.sf_num=[self.pdf.iloc[i]['outlets'][j] for i in self.pdf.index for j in range(len(self.pdf.iloc[i]['outlets'])) if abs(sum(self.sf*self.obs_slope[:-1]+self.obs_intcp[:-1]-np.array(self.pdf.iloc[i]['outprop'][j])))<=1e-3]
-            # if self.sf_num>max([self.pdf.loc[i]['outlets'][j] for i in self.pdf.index for j in range(len(self.pdf.loc[i,'outprop']))]): print('problem finding sf_num', sf, 'found sf_num=',self.sf_num,'outlets:',[self.pdf.loc[i]['outlets'][j] for i in self.pdf.index for j in range(len(self.pdf.loc[i,'outprop']))]); raise ValueError
-        # print('sg:',self.sg,'sf_num:',self.sf_num,'sf:',self.sf)
         self.sg = [0, 1, 3, 4, 2][self.sections]
         if self.sg in [2, 3]:
             self.key_props = None
@@ -329,8 +289,6 @@ class LLEOEnv(gym.Env):
             self.revise_sg()
         else:  ## sg == rxn, separation, CC
             self.sf = np.append(self.sf, self.sg)
-            # self.state=self.sf  # gotta make sure this doesn't affect agent's learning, as flat agent gets done with s'=s not return to feed
-        # print('## rvised sg', self.sg,'sf:', self.sf)
 
     def recycle(self, rec_stream, rec_prop, component):
         pdf = self.pdf.copy()
@@ -343,9 +301,6 @@ class LLEOEnv(gym.Env):
         elif component == "EO":
             unit = "VLE"
             purge = 0.01  # 1-rec_prop[5]
-        # elif component=='W': unit='GLE' ; purge=1-rec_prop[7]
-        # print(pdf.index[pdf.action==str(unit)], unit)
-        ## identifying mixing stream
         mix_stream_loc = pdf.index[pdf.action == str(unit)][
             0
         ]  # get stream from pdf to mix with, given unit
@@ -354,19 +309,11 @@ class LLEOEnv(gym.Env):
         pdf.at[mix_stream_loc, "inlet"] = stream_cnt + 4
         ### solving the rec alone
         out_streams = [stream_cnt + 1, stream_cnt + 2, stream_cnt + 3, stream_cnt + 4]
-        # print('rec_prop:',rec_prop,'\n purge:',purge, '\n mix_prop:',mix_prop)
         out_prop = solve_rec(
             rec_prop, purge, mix_prop
         )  ##outprop = [purge, rec_non_pump, rec_pump, mixed]
         c_in = [0, 0, 0]
         c_out = [0, 0, 0]
-        # print('rec stream:', rec_prop,'out \n',out_prop)
-        # print(pdf)
-        #### working with m
-        # self.recm.conc_const.deactivate(); self.recm.c_explsv.deactivate()
-        ## adding rec streams
-        # solver = SolverFactory('ipopt'); solver.options = {'tol': 1e-6,'max_iter': 600,'bound_relax_factor':1e-6}; results = solver.solve(self.secm, tee=False)
-        # print('##### before open loop :',results.Solver.status)
         for i in np.arange(
             pdf.loc[mix_stream_loc]["c_in"], pdf.loc[mix_stream_loc]["c_out"]
         ):
@@ -389,9 +336,6 @@ class LLEOEnv(gym.Env):
             "exec",
         )
         exec(ln)
-        # solver = SolverFactory('ipopt'); solver.options = {'tol': 1e-6,'max_iter': 600, 'bound_relax_factor':1e-6}; results = solver.solve(self.secm, tee=False)
-        # print('##### open loop splitter:',results.Solver.status)
-        # self.recm.pprint()
         c_in[0] = self.recm.old_constr_cnt.value
         c_out[0] = self.recm.constr_cnt.value
         ln = compile(
@@ -402,8 +346,6 @@ class LLEOEnv(gym.Env):
             "exec",
         )
         exec(ln)
-        # solver = SolverFactory('ipopt'); solver.options = {'tol': 1e-6,'max_iter': 600,'bound_relax_factor':1e-6}; results = solver.solve(self.secm, tee=False)
-        # print('##### open loop dP:',results.Solver.status)
         c_in[1] = self.recm.old_constr_cnt.value
         c_out[1] = self.recm.constr_cnt.value
         ln = compile(
@@ -414,8 +356,6 @@ class LLEOEnv(gym.Env):
             "exec",
         )
         exec(ln)
-        # solver = SolverFactory('ipopt'); solver.options = {'tol': 1e-6,'max_iter': 600,'bound_relax_factor':1e-6}; results = solver.solve(self.secm, tee=False)
-        # print('##### open loop mix:',results.Solver.status)
         c_in[2] = self.recm.old_constr_cnt.value
         c_out[2] = self.recm.constr_cnt.value
         pdf.loc[self.pdf_len] = [
@@ -428,11 +368,6 @@ class LLEOEnv(gym.Env):
             rec_prop,
             out_prop,
         ]
-        # solver = SolverFactory('ipopt'); solver.options = {'tol': 1e-7, 'max_iter': 300}; results = solver.solve(self.secm, tee=False)
-        # print('##### open loop:',results.Solver.status)
-        # if unit=='VLE':
-        #     self.recm.pprint()
-        ## updating mix_stream unit
         if unit == "air":
             ln2 = compile(
                 "self.recm=air(self.recm,self.recm.s{:02d},self.recm.s{:02d},{})".format(
@@ -472,21 +407,10 @@ class LLEOEnv(gym.Env):
         pdf.at[mix_stream_loc, "c_out"] = self.recm.constr_cnt.value
         # try: ##solving m
         t = time.time()
-        # for cnt in range(self.recm.heat_constr_cnt.value-1):
-        #     ln=compile("self.rec{}.deactivate()".format(self.recm.heat_constr[cnt+1].value),'<string>','exec');exec(ln)
-        # self.recm.obj.deactivate()
-        # self.recm.conc_const.deactivate(); self.recm.c_explsv.deactivate()
         solver = SolverFactory("ipopt")
-        # solver.options = {'tol': 1e-2, 'max_iter': 1, 'bound_relax_factor':1e-2}
-        # results = solver.solve(self.recm, tee=False)
         solver.options = {"tol": 1e-7, "max_iter": 200, "bound_relax_factor": 1e-7}
         results = solver.solve(self.recm, tee=False)
         print("##### lvl 1:", results.Solver.status)
-        # for cnt in range(self.recm.heat_constr_cnt.value-1):
-        #     ln=compile("self.rec{}.activate()".format(self.recm.heat_constr[cnt+1].value),'<string>','exec');exec(ln)
-        # solver = SolverFactory('ipopt')
-        # solver.options = {'tol': 1e-7, 'max_iter': 180, 'bound_relax_factor':1e-7}
-        # results = solver.solve(self.recm, tee=False)
         for (
             flux
         ) in self.recm.control_dict.values():  ###unfix all decision vars for opt,
@@ -494,8 +418,6 @@ class LLEOEnv(gym.Env):
                 "self.recm.{}.unfix()".format(flux.value), "<string>", "exec"
             )
             exec(unfix_line)
-        # for cnt in range(self.recm.heat_constr_cnt.value-1):
-        #     ln=compile("self.rec{}.deactivate()".format(self.recm.heat_constr[cnt+1].value),'<string>','exec');exec(ln)
         ### define objective as total profit,,, this is a function of product and C2 streams, and opex
         self.recm.obj.deactivate()
         self.recm.conc_const.deactivate()
@@ -539,23 +461,11 @@ class LLEOEnv(gym.Env):
             self.recm.c_explsv = Constraint(self.recm.t, rule=Elim)
         except:
             pass
-        # self.recm.obj.deactivate(); self.recm.conc_const.deactivate(); self.recm.c_explsv.deactivate()
-        # solver = SolverFactory('ipopt')
-        # solver.options = {'tol': 1e-5, 'max_iter': 180, 'bound_relax_factor':1e-5}
-        # results = solver.solve(self.recm, tee=False)
-        # print('##### lvl 2:',results.Solver.status)
-        # for cnt in range(self.recm.heat_constr_cnt.value-1):
-        #     ln=compile("self.rec{}.activate()".format(self.recm.heat_constr[cnt+1].value),'<string>','exec');exec(ln)
-        # self.recm.obj.activate(); self.recm.conc_const.activate(); self.recm.c_explsv.activate()
         solver = SolverFactory("ipopt")
         solver.options = {"tol": 1e-3, "max_iter": 2, "bound_relax_factor": 1e-3}
         results = solver.solve(self.recm, tee=False)
         solver.options = {"tol": 1e-6, "max_iter": 1100, "bound_relax_factor": 1e-6}
         results = solver.solve(self.recm, tee=False)
-        # self.recm.pprint()
-        # self.recm.obj.deactivate();
-        # for flux in self.recm.control_dict.values(): ###unfix all decision vars for opt,
-        #     unfix_line=compile('self.recm.{}.fix()'.format(flux.value),'<string>','exec');exec(unfix_line)
         print("#### done rec", results.Solver.status, "####")  #
         print(
             results.Solver.status,
@@ -571,15 +481,6 @@ class LLEOEnv(gym.Env):
             "exec",
         )
         exec(obj_ln)
-        # self.recm.s02[3].value=10
-        # solver = SolverFactory('ipopt')
-        # solver.options = {'tol': 1e-6,'max_iter': 10,'bound_relax_factor':1e-6}
-        # results = solver.solve(self.recm, tee=False)
-        # print('#### double check rec',results.Solver.status,'####')  #
-        # solver.options = {'tol': 1e-6,'max_iter': 600,'bound_relax_factor':1e-6}
-        # results = solver.solve(self.recm, tee=False)
-        # print('#### triple check rec',results.Solver.status,'####')  #
-        # print(results.Solver.status,value(self.recm.obj)*self.r_scale[self.rep],'t:',round(time.time()-t,2))
         if results.Solver.status == "ok" and value(self.recm.obj) > 5e-3:
             reward = value(self.recm.obj) * self.r_scale[self.rep]
             for i in pdf.index:  # update unit inprop and outprops
@@ -667,11 +568,6 @@ class LLEOEnv(gym.Env):
             self.done = True  ### True after a full process is finished, no? or after all sections are finished
             ###make report:
             self.avg_r100 += self.reward
-            logboard = 400
-            # if self.episodes%logboard==0:
-            #     print(self.profitable_times, '    ',self.episodes,\
-            #           '    ', int(time.time()-self.time),'    ', np.round(self.avg_r100/logboard,3),'    ', self.counter,'    ',[self.pdf.loc[i]['action'] for i in self.pdf.index])
-            #     self.avg_r100=0
         else:  # other actions....
             inlet = self.key_path[-1]
             if self.logical(discrete) == True:
@@ -776,8 +672,6 @@ class LLEOEnv(gym.Env):
                 outprop = [inprop, inprop]
             if results.Solver.status != "ok":
                 self.reward -= 0.05
-            # except: return m,[(inlet-self.obs_intcp)/self.obs_slope,(inlet-self.obs_intcp)/self.obs_slope]
-            # print('VLE-GLE:',results.Solver.status, 'outprop', np.round(np.array(outprop),2))
             if outprop[0][2] * outprop[0][5] >= outprop[1][2] * outprop[1][5]:
                 self.key_path.append(outlets[0])
                 self.key_props = outprop[0]
@@ -836,12 +730,6 @@ class LLEOEnv(gym.Env):
                 "exec",
             )
             exec(ln2)
-            # if action=='PFR':
-            # for cnt in range(self.secm.heat_constr_cnt.value-1):
-            #     ln=compile("self.sec{}.deactivate()".format(self.secm.heat_constr[cnt+1].value),'<string>','exec');exec(ln)
-            # solver = SolverFactory('ipopt'); solver.options = {'tol': 1e-8, 'max_iter': 450}; results = solver.solve(self.secm, tee=False)
-            # for cnt in range(self.secm.heat_constr_cnt.value-1):
-            #     ln=compile("self.sec{}.activate()".format(self.secm.heat_constr[cnt+1].value),'<string>','exec');exec(ln)
             solver = SolverFactory("ipopt")
             solver.options = {"tol": 1e-8, "max_iter": 450}
             results = solver.solve(self.secm, tee=False)
@@ -860,7 +748,6 @@ class LLEOEnv(gym.Env):
                 outprop = [out]
             except:
                 outprop = [inprop, inprop]
-            # print('other units:', results.Solver.status)
             self.key_path.append(outlets[0])
             self.key_props = outprop[0]
             outprop = [
@@ -879,10 +766,6 @@ class LLEOEnv(gym.Env):
             ]
             self.stream_cnt += 1
             self.pdf_state = self.act_cnt + self.pdf_len
-        # print('in',inprop,'\n',action,param,'\n out',outprop)
-        # print(np.round(np.multiply(self.state,np.array([227,50,1,1,1,1,5e7]))+np.array([273,0,0,0,0,0,-2.5e-7]),1), action, param)
-        # print('outprop:',np.round(outprop,2),'\n inprop',np.round(self.state,2)
-        # if self.state[-1]==0:
         self.state = [*self.key_props, self.sg]
         self.reward = self.r_scale[self.rep] * (
             self.state[5] - self.last_conc
@@ -903,14 +786,9 @@ class LLEOEnv(gym.Env):
 
     def solve_m(self, m, df, prod_stream):
         reward = 0  # -0.05*len(df)#-fdct[2]*fdct[5]#0 #sol_time=0; ## value if failed.
-        # print('solve_m sg:',self.state[-1], 'section:',  df['action'].tolist())
         if self.stream_cnt == self.stream_cnt_checkpoint:
             reward -= 2
         else:  ##solving the model:
-            # try:
-            # solver = SolverFactory('ipopt')
-            # solver.options = {'tol': 1e-7, 'max_iter': 150, 'bound_relax_factor':1e-7}
-            # results = solver.solve(m, tee=False)
             ### unfix control variables
             for flux in m.control_dict.values():  ###unfix all decision vars for opt,
                 unfix_line = compile(
@@ -983,12 +861,9 @@ class LLEOEnv(gym.Env):
             except:
                 pass
             ### solve optimization
-            # for cnt in range(m.heat_constr_cnt.value-1):
-            #     ln=compile("{}.activate()".format(m.heat_constr[cnt+1].value),'<string>','exec');exec(ln)
             solver = SolverFactory("ipopt")
             solver.options = {"tol": 1e-6, "max_iter": 1100, "bound_relax_factor": 1e-6}
             results = solver.solve(m, tee=False)
-            # m.obj.deactivate()
             try:
                 m.conc_const.deactivate()
             except:
@@ -1003,9 +878,6 @@ class LLEOEnv(gym.Env):
                     "m.{}.fix()".format(flux.value), "<string>", "exec"
                 )
                 exec(unfix_line)
-            # results = solver.solve(m, tee=False)
-            # print('####',results.Solver.status,'####')
-            # obj_ln=compile("print(', obj: ',value(m.obj),' flow: ',m.s{:02d}[3].value,', EO: ',m.s{:02d}[6].value)".format(prod_stream,prod_stream),'<string>','exec');exec(obj_ln)
             if results.Solver.status == "ok" and value(m.obj) > 5e-3:
                 sol_time = np.round(results.Solver.Time, 2)
                 reward += value(m.obj) * self.r_scale[self.rep]
@@ -1076,58 +948,3 @@ class LLEOEnv(gym.Env):
             print("obj:", value(m.obj), "reward:", reward)
             # except: reward-=0.5; pass
         return m, df, reward
-
-
-def solve_section(inlet, ops):
-    ## full path solution w 3 recyclings:
-    env = LLEOEnv()
-    env.feed_method = "set"
-    env.reset()
-    print("feed ", np.round(env.state, 5))
-    state, reward, done, _ = env.step([4, 7])  ##[HX, rxn, VLE, GLE, Add(O2), dP, sink]
-    print("air", np.round(reward, 3), np.round(state, 5))
-    state, reward, done, _ = env.step([0, 10])
-    print("HX", np.round(reward, 3), np.round(state, 3))
-    state, reward, done, _ = env.step([1, 10])
-    print("PFR", np.round(reward, 3), np.round(state, 2))
-    state, reward, done, _ = env.step([6, 4])
-    print("sink", np.round(reward, 3), np.round(state, 2))
-    print(env.key_path)
-
-    HX, GLE, dP, VLE1, VLE2 = [*inlet]
-    env.reset()
-    env.sg = 1
-    env.state[-1] = 1
-    try:
-        state, reward, done, _ = env.step([0, HX])
-        print("HX", np.round(reward, 3), np.round(state, 3))
-        state, reward, done, _ = env.step(
-            [3, GLE]
-        )  ##[HX, rxn, VLE, GLE, Add(O2), dP, sink]
-        print("GLE", np.round(reward, 3), np.round(state, 3))
-        state, reward, done, _ = env.step(
-            [5, dP]
-        )  ##[HX, rxn, VLE, GLE, Add(O2), dP, sink]
-        print("dP", np.round(reward, 3), np.round(state, 3))
-        state, reward, done, _ = env.step(
-            [2, VLE1]
-        )  ##[HX, rxn, VLE, GLE, Add(O2), dP, sink]
-        print("VLE", np.round(reward, 3), np.round(state, 3))
-        state, reward, done, _ = env.step(
-            [2, VLE2]
-        )  ##[HX, rxn, VLE, GLE, Add(O2), dP, sink]
-        print("VLE", np.round(reward, 3), np.round(state, 3))
-        state, reward, done, _ = env.step(
-            [6, 4]
-        )  ##[HX, rxn, VLE, GLE, Add(O2), dP, sink]
-        print("sink", np.round(reward, 3), np.round(state, 3))
-        print("##")
-        env.reset()
-        obj = env.recycle(
-            12, env.pdf.iloc[7]["outprop"][1], "EO"
-        )  ##recyc stream prop: pdf.iloc[-1]['outprop'][1]
-        is_success = 1
-    except:
-        obj = None
-        is_success = 0
-    return obj, is_success
