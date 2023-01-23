@@ -1,11 +1,12 @@
-import time
+'''
+Generate inlets for the ethylene oxide flash drum model.
+'''
+
 import pickle
 
 import numpy as np
-import pandas as pd
 
 from find_enthalpy import find_enthalpy
-from ethylene_oxide_flash_drum import ethylene_oxide_flash_drum
 
 
 def generate_inlet():
@@ -35,9 +36,3 @@ def generate_inlets(pts):
         pickle.dump(random_inlets, f)
 
 
-def generate_test_inlets(test_pts):
-    random_inlets = []
-    for i in range(test_pts):
-        random_inlets.append(generate_inlet())
-    with open("part2/pickled_data/test_inlets.pkl", "wb") as f:
-        pickle.dump(random_inlets, f)

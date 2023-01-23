@@ -4,7 +4,6 @@ Credit to my supervisor for the following physical models of an ethylene oxide f
 Physical model for calculating the output streams of an ethylene oxide flash drum at chemical equilibrium.
 """
 
-from math import exp
 
 import numpy as np
 import pandas as pd
@@ -15,8 +14,10 @@ from pyomo.environ import (
     Reals,
     NonNegativeReals,
     Var,
-    Constraint,
+    value,
     Any,
+    Constraint,
+    exp
 )
 from pyomo.opt import SolverFactory
 

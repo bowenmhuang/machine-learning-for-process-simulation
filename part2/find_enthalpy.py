@@ -6,6 +6,7 @@ Physical model for finding the enthalpy of a multi-component stream.
 
 import numpy as np
 import pandas as pd
+
 from pyomo.environ import (
     ConcreteModel,
     RangeSet,
