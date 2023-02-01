@@ -4,7 +4,7 @@ from train import train_RF_obj, train_RF_successes, train_RF_both
 from test import test_RF_obj, test_RF_successes
 from plot import plot_corr_obj
 
-def run_code():
+def main():
     pts = 100
     data, objs, is_successes = generate_data(pts)
 
@@ -19,4 +19,5 @@ def run_code():
     test_RF_successes(RF, test_pts)
     print(a, b)
 
-run_code()
+if __name__ == "__main__":
+    main()

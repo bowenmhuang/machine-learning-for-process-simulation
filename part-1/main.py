@@ -17,7 +17,7 @@ from generate_data import generate_test_data, generate_training_data
 from train_and_test_ML_models import train_and_test_ML_models
 from plot import plot_scores_and_times
 
-def run_code():
+def main():
     # generate test data. calculates inlet-outlet pairs using physical_model. test data is generated once, via random sampling, for all tests.
     test_pts = 1000
     generate_test_data(test_pts)
@@ -33,4 +33,4 @@ def run_code():
     plot_scores_and_times(pts_set)
 
 if __name__ == "__main__":
-    run_code()
+    main()
